@@ -12,4 +12,5 @@ start testrpc in another terminal then:
 
 ```truffle compile
 truffle migrate
-truffle test ```
+truffle test 
+```
