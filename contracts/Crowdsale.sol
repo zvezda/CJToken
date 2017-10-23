@@ -15,6 +15,10 @@ contract Crowdsale is Ownable {
     uint256 public endTime;
     // amount of raised money in wei
     uint256 public weiRaised;
+    // amount of tokens sold
+    uint256 public tokensSold;
+    // max amount of token for sale during ICO
+    uint256 public maxCap = 1100000000 * 10**18;
 
     /**
     * event for token purchase logging
@@ -51,11 +55,9 @@ contract Crowdsale is Ownable {
         }
     }
 
-    // compute amount of token based on the following:
-    // 1 CJT = 0.1 EUR
-    // 1 ETH = 280 EUR -> 1 ETH = 2800 CJT
+    // compute amount of token based on 1 ETH = 2400 CJT
     function getTokenAmount(uint256 _weiAmount) internal returns(uint256) {
-        uint256 tokens = _weiAmount.mul(2800);
+        uint256 tokens = _weiAmount.mul(2400);
         // cannot buy less than 1000 tokens
         if (tokens < 1000 * (10 ** 18)) {
             return 0;
@@ -91,6 +93,9 @@ contract Crowdsale is Ownable {
         // update state
         weiRaised = weiRaised.add(weiAmount);
 
+        tokensSold = tokensSold.add(tokens);
+        require(tokensSold <= maxCap);
+
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
         multisigVault.transfer(msg.value);
@@ -105,12 +110,16 @@ contract Crowdsale is Ownable {
 
     // @return true if crowdsale event has ended
     function hasEnded() public constant returns (bool) {
-        return now > endTime;
+        return now > endTime || tokensSold >= maxCap;
     }
 
-    // send tokens to multisig wallet
-    function withdrawTokens(uint256 _amount) {
-        require(msg.sender == multisigVault);
-        coin.transfer(multisigVault, _amount);
+    // send reserve tokens (35% of the sodl amount) to the multisig wallet and burn the rest
+    // can only be called when the ICO is over
+    function sendReserveTokens() onlyOwner {
+        require(now > endTime || tokensSold >= maxCap);
+        uint256 _amount = tokensSold * 35 / 100;
+        uint256 burnAmount = coin.balanceOf(this) - _amount;
+        coin.transfer(multisigVault,_amount);
+        coin.burn(burnAmount);
     }
 }

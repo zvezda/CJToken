@@ -84,44 +84,44 @@ contract('ICO', function(accounts) {
       throw new Error("I should never see this!")
   });
 
-  it("Should Buy 2800 tokens + 5% on day 1 -> 2940 tokens", async function() {
+  it("Should Buy 2400 tokens + 5% on day 1 -> 2520 tokens", async function() {
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 2940000000000000000000, "2940 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 2520000000000000000000, "2520 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2800 tokens + 4% on day 2 -> 2912 tokens", async function() {
+  it("Should Buy 2400 tokens + 4% on day 2 -> 2496 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 5852000000000000000000, "5852 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 5016000000000000000000, "5016 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2800 tokens + 3% on day 3 -> 2884 tokens", async function() {
+  it("Should Buy 2400 tokens + 3% on day 3 -> 2472 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 8736000000000000000000, "8736 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 7488000000000000000000, "7488 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2800 tokens + 2% on day 4 -> 2856 tokens", async function() {
+  it("Should Buy 2400 tokens + 2% on day 4 -> 2448 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 11592000000000000000000, "11592 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 9936000000000000000000, "9936 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2800 tokens + 1% on day 5 -> 2828 tokens", async function() {
+  it("Should Buy 2400 tokens + 1% on day 5 -> 2424 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 14420000000000000000000, "14420 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 12360000000000000000000, "12360 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2800 tokens without any bonus after day 5", async function() {
+  it("Should Buy 2400 tokens without any bonus after day 5", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1);
-      assert.equal(balance.valueOf(), 17220000000000000000000, "14760 wasn't in the buyer account.");
+      assert.equal(balance.valueOf(), 14760000000000000000000, "14760 wasn't in the buyer account.");
   });
 
 
