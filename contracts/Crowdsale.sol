@@ -93,14 +93,7 @@ contract Crowdsale is Ownable {
 
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-        forwardFunds();
-    }
-
-    // send ether to the fund collection wallet
-    function forwardFunds() internal {
-        if (!multisigVault.send(msg.value)) {
-            revert();
-        }
+        multisigVault.transfer(msg.value);
     }
 
     // @return true if the transaction can buy tokens
