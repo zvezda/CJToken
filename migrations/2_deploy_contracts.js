@@ -7,7 +7,7 @@ module.exports = function(deployer) {
 	//wallet where ether is deposited
 	var wallet = web3.eth.accounts[1];
 	// Amount of token to transfer to crowdsale contract
-	var tokenICOAmount = 1100000000000000000000000000;
+	var tokenICOAmount = 1692000000000000000000000000;
 
 	console.log("Owner address: " + owner);
 	console.log("Wallet address: " + wallet);

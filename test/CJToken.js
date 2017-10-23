@@ -61,17 +61,17 @@ contract('ICO', function(accounts) {
         return balance;
     }
 
-    it("should remain 592,000,000 CJToken in the first account", async function() {
+    it("should remain 0 CJToken in the first account", async function() {
         await printBalance();
         let token = await CJToken.deployed();
         let balance = await token.balanceOf.call(owner);
-        assert.equal(balance.valueOf(), 592000000000000000000000000, "592000000 wasn't in the first account");
+        assert.equal(balance.valueOf(), 0, "0 wasn't in the first account");
     });
 
-    it("should have 1,100,000,000 CJToken in Crowdsale contract", async function() {
+    it("should have 1,692,000,000 CJToken in Crowdsale contract", async function() {
         let token = await CJToken.deployed();
         let balance = await token.balanceOf.call(Crowdsale.address);
-        assert.equal(balance.valueOf(), 1100000000000000000000000000, "1,100,000,000.000000 wasn't in the Crowdsale account")
+        assert.equal(balance.valueOf(), 1692000000000000000000000000, "1,692,000,000.000000 wasn't in the Crowdsale account")
   });
 
   it("Should not Buy less than 1000 tokens", async function() {

@@ -1,10 +1,10 @@
 //ERC20 Token
 pragma solidity ^0.4.12;
 
-import './StandardToken.sol';
+import './BurnableToken.sol';
 import './Ownable.sol';
 
-contract CJToken is StandardToken, Ownable {
+contract CJToken is BurnableToken, Ownable {
 
     string public constant name = "ConnectJob";
     string public constant symbol = "CJT";
