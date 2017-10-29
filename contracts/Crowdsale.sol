@@ -113,11 +113,11 @@ contract Crowdsale is Ownable {
         return now > endTime || tokensSold >= maxCap;
     }
 
-    // send reserve tokens (35% of the sodl amount) to the multisig wallet and burn the rest
+    // send reserve tokens (35% of the sold amount) to the multisig wallet and burn the rest
     // can only be called when the ICO is over
     function sendReserveTokens() onlyOwner {
         require(now > endTime || tokensSold >= maxCap);
-        uint256 _amount = tokensSold * 35 / 100;
+        uint256 _amount = tokensSold.div(65).mul(35);
         uint256 burnAmount = coin.balanceOf(this) - _amount;
         coin.transfer(multisigVault,_amount);
         coin.burn(burnAmount);

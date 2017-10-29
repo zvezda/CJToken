@@ -51,13 +51,13 @@ var printBalance = async function() {
 }
 
 contract('ICO', function(accounts) {
-    var investEther = async function(sum) {
+    var investEther = async function(sum, from) {
         var investSum = web3.toWei(sum, "ether");
 
         let ico = await Crowdsale.deployed();
-        let txn = await ico.sendTransaction({from: buyer, to: ico.address, value: investSum});
+        let txn = await ico.sendTransaction({from: from, to: ico.address, value: investSum});
         let token = await CJToken.deployed();
-        let balance = await token.balanceOf.call(buyer);
+        let balance = await token.balanceOf.call(from);
         return balance;
     }
 
@@ -76,7 +76,7 @@ contract('ICO', function(accounts) {
 
   it("Should not Buy less than 1000 tokens", async function() {
       try {
-          let balance = await investEther(0.1);
+          let balance = await investEther(0.1, buyer);
       } catch (e) {
           return true;
       }
@@ -85,43 +85,99 @@ contract('ICO', function(accounts) {
   });
 
   it("Should Buy 2400 tokens + 5% on day 1 -> 2520 tokens", async function() {
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 2520000000000000000000, "2520 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens + 4% on day 2 -> 2496 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 5016000000000000000000, "5016 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens + 3% on day 3 -> 2472 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 7488000000000000000000, "7488 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens + 2% on day 4 -> 2448 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 9936000000000000000000, "9936 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens + 1% on day 5 -> 2424 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 12360000000000000000000, "12360 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens without any bonus after day 5", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(1);
+      let balance = await investEther(1, buyer);
       assert.equal(balance.valueOf(), 14760000000000000000000, "14760 wasn't in the buyer account.");
+  });
+
+  it("Should Buy 24000 tokens", async function() {
+      await timeTravel(86400 * 1); // 1 day later
+      await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
+      let balance = await investEther(10, buyer);
+      assert.equal(balance.valueOf(), 38760000000000000000000, "38760 wasn't in the buyer account.");
+  });
+
+  it("Should Buy 24000 tokens", async function() {
+      await timeTravel(86400 * 1); // 1 day later
+      await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
+      let balance = await investEther(10, thief);
+      assert.equal(balance.valueOf(), 24000000000000000000000, "38760 wasn't in the thief account.");
+  });
+
+  it("Should transfer 1000 tokens from buyer to thief", async function() {
+      let token = await CJToken.deployed();
+      //let approve = await CJToken.approve(buyer, thief, 1000000000000000000000);
+      let txn = await token.transfer(thief, 1000000000000000000000, {from: buyer});
+      let balance = await token.balanceOf.call(thief);
+      assert.equal(balance.valueOf(), 25000000000000000000000, "1000 CJT wasn't in the buyer account.");
+  });
+
+
+  it("Should not Buy tokens when ICO end date", async function() {
+      await timeTravel(86400 * 40); // 40 day later
+      await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
+      try {
+          let balance = await investEther(1, buyer);
+      } catch (e) {
+          return true;
+      }
+
+      throw new Error("I should never see this!")
+  });
+
+  it("Should distribute the reserve tokens and burn the rest", async function() {
+      let token = await CJToken.deployed();
+      let ico = await Crowdsale.deployed();
+
+      let txn = await ico.sendReserveTokens({from: owner});
+      let balance = await token.balanceOf.call(wallet);
+
+      assert.equal(balance.valueOf(), 33793846153846153846135, "1000 CJT wasn't in the buyer account.");
+
+      await printBalance();
+  });
+
+  it("Should return an empty token balance for the ICO contract", async function() {
+      let token = await CJToken.deployed();
+      balance = await token.balanceOf.call(Crowdsale.address);
+
+      assert.equal(balance.valueOf(), 0, "Crowdsale contract still have tokens");
+
+      await printBalance();
   });
 
 
