@@ -17,6 +17,8 @@ contract Crowdsale is Ownable {
     uint256 public weiRaised;
     // amount of tokens sold
     uint256 public tokensSold;
+    // amount of tokens sold during preICO
+    uint256 public preIcoTokensSold;
     // max amount of token for sale during ICO
     uint256 public maxCap = 1100000000 * 10**18;
 
@@ -33,9 +35,9 @@ contract Crowdsale is Ownable {
         coin = CJToken(_CJTokenAddress);
         multisigVault = _to;
 
-        // startTime = 1509840000; // new Date("Nov 05 2017 00:00:00 GMT").getTime() / 1000;
+        // startTime = 1511740800; // new Date("Nov 27 2017 00:00:00 GMT").getTime() / 1000;
         startTime = now; // for testing we use now
-        endTime = startTime + 39 days; // ICO duration = 39 days
+        endTime = startTime + 41 days; // ICO end on Jan 07 2018 00:00:00 GMT
     }
 
     modifier isStarted() {
@@ -49,7 +51,7 @@ contract Crowdsale is Ownable {
     }
 
     // allow owner to modify address of wallet
-    function setWallet(address _multisigVault) public onlyOwner {
+    function setMultiSigVault(address _multisigVault) public onlyOwner {
         if (_multisigVault != address(0)) {
             multisigVault = _multisigVault;
         }
