@@ -1,11 +1,14 @@
-var CJToken = artifacts.require("./CJToken.sol");
-var Crowdsale = artifacts.require("./Crowdsale.sol");
+var CJToken = artifacts.require("./CJToken.sol"),
+  Crowdsale = artifacts.require("./Crowdsale.sol");
 
-var eth = web3.eth;
-var owner = eth.accounts[0];
-var wallet = eth.accounts[1];
-var buyer = eth.accounts[2];
-var thief = eth.accounts[3];
+var eth  = web3.eth,
+  owner  = eth.accounts[0],
+  wallet = eth.accounts[1],
+  buyer  = eth.accounts[2],
+  buyer2 = eth.accounts[3],
+  totalTokensSold  = 0,
+  buyerTokenBalance  = 0,
+  buyer2TokenBalance = 0;
 
 const timeTravel = function (time) {
     return new Promise((resolve, reject) => {
@@ -41,13 +44,13 @@ var printBalance = async function() {
 
     let token = await CJToken.deployed();
     let balance = await token.balanceOf.call(owner);
-    console.log("Owner balance: ", web3.fromWei(ownerBalance, "ether").toString(), " ETHER / ", balance.valueOf(), " CJT");
+    console.log("Owner balance: ", web3.fromWei(ownerBalance, "ether").toString(), " ETHER / ", web3.fromWei(balance.valueOf(), "ether").toString(), " CJT");
     balance = await token.balanceOf.call(buyer);
-    console.log("Buyer balance: ", web3.fromWei(buyerBalance, "ether").toString(), " ETHER / ", balance.valueOf(), " CJT");
+    console.log("Buyer balance: ", web3.fromWei(buyerBalance, "ether").toString(), " ETHER / ", web3.fromWei(balance.valueOf(), "ether").toString(), " CJT");
     balance = await token.balanceOf.call(Crowdsale.address);
-    console.log("Crowdsale balance: ", web3.fromWei(crowdsaleBalance, "ether").toString(), " ETHER / ", balance.valueOf(), " CJT");
+    console.log("Crowdsale balance: ", web3.fromWei(crowdsaleBalance, "ether").toString(), " ETHER / ", web3.fromWei(balance.valueOf(), "ether").toString(), " CJT");
     balance = await token.balanceOf.call(wallet);
-    console.log("wallet balance: ", web3.fromWei(walletBalance, "ether").toString(), " ETHER / ", balance.valueOf(), " CJT");
+    console.log("wallet balance: ", web3.fromWei(walletBalance, "ether").toString(), " ETHER / ", web3.fromWei(balance.valueOf(), "ether").toString(), " CJT");
 }
 
 contract('ICO', function(accounts) {
@@ -84,66 +87,86 @@ contract('ICO', function(accounts) {
       throw new Error("I should never see this!")
   });
 
-  it("Should Buy 2400 tokens + 5% on day 1 -> 2520 tokens", async function() {
+  it("Should Buy 2400 tokens + 15% on day 1 -> 2760 tokens", async function() {
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 2520000000000000000000, "2520 wasn't in the buyer account.");
+      totalTokensSold += 2760000000000000000000;
+      buyerTokenBalance += 2760000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "2760 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2400 tokens + 4% on day 2 -> 2496 tokens", async function() {
+  it("Should Buy 2400 tokens + 12% on day 2 -> 2688 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 5016000000000000000000, "5016 wasn't in the buyer account.");
+      totalTokensSold += 2688000000000000000000;
+      buyerTokenBalance += 2688000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "5448 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2400 tokens + 3% on day 3 -> 2472 tokens", async function() {
+  it("Should Buy 2400 tokens + 9% on day 3 -> 2616 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 7488000000000000000000, "7488 wasn't in the buyer account.");
+      totalTokensSold += 2616000000000000000000;
+      buyerTokenBalance += 2616000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "8064 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2400 tokens + 2% on day 4 -> 2448 tokens", async function() {
+  it("Should Buy 2400 tokens + 6% on day 4 -> 2544 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 9936000000000000000000, "9936 wasn't in the buyer account.");
+      totalTokensSold += 2544000000000000000000;
+      buyerTokenBalance += 2544000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "10608 wasn't in the buyer account.");
   });
 
-  it("Should Buy 2400 tokens + 1% on day 5 -> 2424 tokens", async function() {
+  it("Should Buy 2400 tokens + 3% on day 5 -> 2472 tokens", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 12360000000000000000000, "12360 wasn't in the buyer account.");
+      totalTokensSold += 2472000000000000000000;
+      buyerTokenBalance += 2472000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "13080 wasn't in the buyer account.");
   });
 
   it("Should Buy 2400 tokens without any bonus after day 5", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       let balance = await investEther(1, buyer);
-      assert.equal(balance.valueOf(), 14760000000000000000000, "14760 wasn't in the buyer account.");
+      totalTokensSold += 2400000000000000000000;
+      buyerTokenBalance += 2400000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "15480 wasn't in the buyer account.");
   });
 
-  it("Should Buy 24000 tokens", async function() {
+
+  it("Should Buy 24000 tokens from buyer2", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(10, buyer);
-      assert.equal(balance.valueOf(), 38760000000000000000000, "38760 wasn't in the buyer account.");
+      let balance = await investEther(10, buyer2);
+      totalTokensSold += 24000000000000000000000;
+      buyer2TokenBalance += 24000000000000000000000;
+      assert.equal(balance.valueOf(), buyer2TokenBalance, "24000 wasn't in the buyer2 account.");
   });
 
-  it("Should Buy 24000 tokens", async function() {
+  it("Should Buy 48000 tokens from buyer2", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(10, thief);
-      assert.equal(balance.valueOf(), 24000000000000000000000, "38760 wasn't in the thief account.");
+      let balance = await investEther(20, buyer2);
+      totalTokensSold += 48000000000000000000000;
+      buyer2TokenBalance += 48000000000000000000000;
+      assert.equal(balance.valueOf(), buyer2TokenBalance, "48000 wasn't in the buyer2 account.");
   });
 
-  it("Should transfer 1000 tokens from buyer to thief", async function() {
+  it("Should transfer 1000 tokens from buyer to buyer2", async function() {
       let token = await CJToken.deployed();
-      //let approve = await CJToken.approve(buyer, thief, 1000000000000000000000);
-      let txn = await token.transfer(thief, 1000000000000000000000, {from: buyer});
-      let balance = await token.balanceOf.call(thief);
-      assert.equal(balance.valueOf(), 25000000000000000000000, "1000 CJT wasn't in the buyer account.");
+      let txn = await token.transfer(buyer2, 1000000000000000000000, {from: buyer});
+      let balance = await token.balanceOf.call(buyer);
+      let balance2 = await token.balanceOf.call(buyer2);
+      buyerTokenBalance -= 1000000000000000000000;
+      buyer2TokenBalance += 1000000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "1000 CJT wasn't removed from buyer account.");
+      assert.equal(balance2.valueOf(), buyer2TokenBalance, "1000 CJT wasn't transfered to buyer2 account.");
   });
 
 
@@ -165,10 +188,15 @@ contract('ICO', function(accounts) {
 
       let txn = await ico.sendReserveTokens({from: owner});
       let balance = await token.balanceOf.call(wallet);
+      let ts = await ico.tokensSold.call();
 
-      assert.equal(balance.valueOf(), 33793846153846153846135, "1000 CJT wasn't in the buyer account.");
 
-      await printBalance();
+      let reserveAmount = totalTokensSold * 35 / 65;
+      console.log("total token sold: ", web3.fromWei(totalTokensSold, "ether").toString());
+      console.log("reserve amount: ", web3.fromWei(reserveAmount, "ether").toString());
+
+      assert.equal(balance.valueOf(), reserveAmount, "reserve amount is incorrect.");
+
   });
 
   it("Should return an empty token balance for the ICO contract", async function() {

@@ -65,15 +65,15 @@ contract Crowdsale is Ownable {
 
         // compute first days bonus
         if(now < startTime + 1*24*60* 1 minutes) {
-            tokens += (tokens * 5) / 100;
+            tokens += (tokens * 15) / 100;
         } else if(now < startTime + 2*24*60* 1 minutes) {
-            tokens += (tokens * 4) / 100;
+            tokens += (tokens * 12) / 100;
         } else if(now < startTime + 3*24*60* 1 minutes) {
-            tokens += (tokens * 3) / 100;
+            tokens += (tokens * 9) / 100;
         } else if(now < startTime + 4*24*60* 1 minutes) {
-            tokens += (tokens * 2) / 100;
+            tokens += (tokens * 6) / 100;
         } else if(now < startTime + 5*24*60* 1 minutes) {
-            tokens += (tokens * 1) / 100;
+            tokens += (tokens * 3) / 100;
         }
 
         return tokens;
@@ -117,7 +117,7 @@ contract Crowdsale is Ownable {
     // can only be called when the ICO is over
     function sendReserveTokens() onlyOwner {
         require(now > endTime || tokensSold >= maxCap);
-        uint256 _amount = tokensSold.div(65).mul(35);
+        uint256 _amount = tokensSold.mul(35).div(65);
         uint256 burnAmount = coin.balanceOf(this) - _amount;
         coin.transfer(multisigVault,_amount);
         coin.burn(burnAmount);
