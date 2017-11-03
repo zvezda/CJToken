@@ -8,6 +8,7 @@ module.exports = function(deployer) {
 	var wallet = web3.eth.accounts[1];
 	// Amount of token to transfer to crowdsale contract
 	var tokenICOAmount = 1692000000000000000000000000;
+	var preIcoTokensSold = 11500000000000000000000000;
 
 	console.log("Owner address: " + owner);
 	console.log("Wallet address: " + wallet);
@@ -20,14 +21,17 @@ module.exports = function(deployer) {
   		return deployer.deploy(Crowdsale, CJToken.address, wallet, { from: owner }).then(function() {
   			console.log("Crowdsale address: " + Crowdsale.address);
   			return CJToken.deployed().then(function(token) {
-				return Crowdsale.deployed().then(function(crowdsale) {
-					// send token to crowdsale contract
-					return token.transfer(Crowdsale.address, tokenICOAmount, {from: owner}).then(function (txn) {
-						return token.balanceOf.call(Crowdsale.address);
-					}).then(function (balance) {
-				      console.log("Crowdsale CJT balance: " + web3.fromWei(balance, "ether"));
-				    });
-				});
+					return Crowdsale.deployed().then(function(crowdsale) {
+						// send token to crowdsale contract
+						return token.transfer(Crowdsale.address, tokenICOAmount, {from: owner}).then(function (txn) {
+							return token.balanceOf.call(Crowdsale.address);
+						}).then(function (balance) {
+					      console.log("Crowdsale CJT balance: " + web3.fromWei(balance, "ether"));
+								return crowdsale.setPreIcoTokensSold(preIcoTokensSold).then(function () {
+									console.log('preICO sold tokens set');
+								});
+					    });
+					});
   			});
   		});
   	});

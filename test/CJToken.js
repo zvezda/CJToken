@@ -7,6 +7,7 @@ var eth  = web3.eth,
   buyer  = eth.accounts[2],
   buyer2 = eth.accounts[3],
   totalTokensSold  = 0,
+  preIcoTokensSold = 11500000000000000000000000,
   buyerTokenBalance  = 0,
   buyer2TokenBalance = 0;
 
@@ -171,7 +172,7 @@ contract('ICO', function(accounts) {
 
 
   it("Should not Buy tokens when ICO end date", async function() {
-      await timeTravel(86400 * 40); // 40 day later
+      await timeTravel(86400 * 42); // 40 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       try {
           let balance = await investEther(1, buyer);
@@ -188,11 +189,9 @@ contract('ICO', function(accounts) {
 
       let txn = await ico.sendReserveTokens({from: owner});
       let balance = await token.balanceOf.call(wallet);
-      let ts = await ico.tokensSold.call();
 
-
-      let reserveAmount = totalTokensSold * 35 / 65;
-      console.log("total token sold: ", web3.fromWei(totalTokensSold, "ether").toString());
+      let reserveAmount = (totalTokensSold + preIcoTokensSold) * 35 / 65;
+      console.log("total token sold (including preICO): ", web3.fromWei(totalTokensSold + preIcoTokensSold, "ether").toString());
       console.log("reserve amount: ", web3.fromWei(reserveAmount, "ether").toString());
 
       assert.equal(balance.valueOf(), reserveAmount, "reserve amount is incorrect.");

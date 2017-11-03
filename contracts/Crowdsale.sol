@@ -57,6 +57,16 @@ contract Crowdsale is Ownable {
         }
     }
 
+    // allow owner to set the number of tokens sold during the preSale
+    function setPreIcoTokensSold(uint256 _weiAmount) public onlyOwner {
+            preIcoTokensSold = _weiAmount;
+    }
+
+    // return the total number of tokens osld including preSale
+    function getTotalTokenSold() public returns(uint256) {
+        return tokensSold.add(preIcoTokensSold);
+    }
+
     // compute amount of token based on 1 ETH = 2400 CJT
     function getTokenAmount(uint256 _weiAmount) internal returns(uint256) {
         uint256 tokens = _weiAmount.mul(2400);
@@ -96,7 +106,7 @@ contract Crowdsale is Ownable {
         weiRaised = weiRaised.add(weiAmount);
 
         tokensSold = tokensSold.add(tokens);
-        require(tokensSold <= maxCap);
+        require(getTotalTokenSold() <= maxCap);
 
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
@@ -112,14 +122,15 @@ contract Crowdsale is Ownable {
 
     // @return true if crowdsale event has ended
     function hasEnded() public constant returns (bool) {
-        return now > endTime || tokensSold >= maxCap;
+        return now > endTime || getTotalTokenSold() >= maxCap;
     }
 
     // send reserve tokens (35% of the sold amount) to the multisig wallet and burn the rest
     // can only be called when the ICO is over
     function sendReserveTokens() onlyOwner {
-        require(now > endTime || tokensSold >= maxCap);
-        uint256 _amount = tokensSold.mul(35).div(65);
+        require(now > endTime || getTotalTokenSold() >= maxCap);
+        uint256 total = getTotalTokenSold();
+        uint256 _amount = total.mul(35).div(65);
         uint256 burnAmount = coin.balanceOf(this) - _amount;
         coin.transfer(multisigVault,_amount);
         coin.burn(burnAmount);
