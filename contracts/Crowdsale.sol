@@ -63,17 +63,17 @@ contract Crowdsale is Ownable {
             return 0;
         }
 
-        // compute first days bonus
-        if(now < startTime + 1*24*60* 1 minutes) {
-            tokens += (tokens * 15) / 100;
-        } else if(now < startTime + 2*24*60* 1 minutes) {
-            tokens += (tokens * 12) / 100;
-        } else if(now < startTime + 3*24*60* 1 minutes) {
-            tokens += (tokens * 9) / 100;
-        } else if(now < startTime + 4*24*60* 1 minutes) {
-            tokens += (tokens * 6) / 100;
-        } else if(now < startTime + 5*24*60* 1 minutes) {
-            tokens += (tokens * 3) / 100;
+        // compute bonus
+        if(now < startTime + 7*24*60* 1 minutes) {
+            tokens += (tokens * 15) / 100; // 15% for first week
+        } else if(now < startTime + 14*24*60* 1 minutes) {
+            tokens += (tokens * 12) / 100; // 12% for second week
+        } else if(now < startTime + 21*24*60* 1 minutes) {
+            tokens += (tokens * 9) / 100; // 9% for third week
+        } else if(now < startTime + 28*24*60* 1 minutes) {
+            tokens += (tokens * 6) / 100; // 6% for fourth week
+        } else if(now < startTime + 35*24*60* 1 minutes) {
+            tokens += (tokens * 3) / 100; // 3% for fifth week
         }
 
         return tokens;
