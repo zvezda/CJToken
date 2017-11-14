@@ -1,5 +1,5 @@
 //ERC20 Token
-pragma solidity ^0.4.12;
+pragma solidity 0.4.15;
 
 import './BurnableToken.sol';
 import './Ownable.sol';
