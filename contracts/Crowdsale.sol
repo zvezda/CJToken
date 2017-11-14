@@ -17,10 +17,8 @@ contract Crowdsale is Ownable {
     uint256 public weiRaised;
     // amount of tokens sold
     uint256 public tokensSold;
-    // amount of tokens sold during preICO
-    uint256 public preIcoTokensSold;
     // max amount of token for sale during ICO
-    uint256 public maxCap = 1100000000 * 10**18;
+    uint256 public maxCap;
 
     /**
     * event for token purchase logging
@@ -31,9 +29,10 @@ contract Crowdsale is Ownable {
     */
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
 
-    function Crowdsale(address _CJTokenAddress, address _to) {
+    function Crowdsale(address _CJTokenAddress, address _to, uint256 _maxCap) {
         coin = CJToken(_CJTokenAddress);
         multisigVault = _to;
+        maxCap = _maxCap;
 
         // startTime = 1511740800; // new Date("Nov 27 2017 00:00:00 GMT").getTime() / 1000;
         startTime = now; // for testing we use now
@@ -54,16 +53,6 @@ contract Crowdsale is Ownable {
     function setMultiSigVault(address _multisigVault) public onlyOwner {
         require(_multisigVault != address(0));
         multisigVault = _multisigVault;
-    }
-
-    // allow owner to set the number of tokens sold during the preSale
-    function setPreIcoTokensSold(uint256 _weiAmount) public onlyOwner {
-            preIcoTokensSold = _weiAmount;
-    }
-
-    // return the total number of tokens osld including preSale
-    function getTotalTokenSold() public returns(uint256) {
-        return tokensSold.add(preIcoTokensSold);
     }
 
     // compute amount of token based on 1 ETH = 2400 CJT
@@ -105,7 +94,7 @@ contract Crowdsale is Ownable {
         weiRaised = weiRaised.add(weiAmount);
 
         tokensSold = tokensSold.add(tokens);
-        require(getTotalTokenSold() <= maxCap);
+        require(tokensSold <= maxCap);
 
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
@@ -121,17 +110,13 @@ contract Crowdsale is Ownable {
 
     // @return true if crowdsale event has ended
     function hasEnded() public constant returns (bool) {
-        return now > endTime || getTotalTokenSold() >= maxCap;
+        return now > endTime || tokensSold >= maxCap;
     }
 
-    // send reserve tokens (35% of the sold amount) to the multisig wallet and burn the rest
+    // Finalize crowdsale buy burning the remaining tokens
     // can only be called when the ICO is over
-    function sendReserveTokens() onlyOwner {
-        require(now > endTime || getTotalTokenSold() >= maxCap);
-        uint256 total = getTotalTokenSold();
-        uint256 _amount = total.mul(35).div(65);
-        uint256 burnAmount = coin.balanceOf(this) - _amount;
-        coin.transfer(multisigVault,_amount);
-        coin.burn(burnAmount);
+    function finalizeCrowdsale() {
+        require(now > endTime || tokensSold >= maxCap);
+        coin.burn(coin.balanceOf(this));
     }
 }

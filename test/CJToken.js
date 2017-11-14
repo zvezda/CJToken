@@ -7,9 +7,15 @@ var eth  = web3.eth,
   buyer  = eth.accounts[2],
   buyer2 = eth.accounts[3],
   totalTokensSold  = 0,
-  preIcoTokensSold = 11500000000000000000000000,
   buyerTokenBalance  = 0,
   buyer2TokenBalance = 0;
+
+  var totalSupply       = 1692000000,
+      totalTokenForSale = 1100000000,
+      // preICO tokens will be kept in owner wallet until distributed
+      preIcoTokensSold  = 11500000, // need to be set when presale is over
+      maxCap            = totalTokenForSale - preIcoTokensSold,
+      reserveAmount     = totalSupply - totalTokenForSale;
 
 const timeTravel = function (time) {
     return new Promise((resolve, reject) => {
@@ -65,17 +71,17 @@ contract('ICO', function(accounts) {
         return balance;
     }
 
-    it("should remain 0 CJToken in the first account", async function() {
+    it("should remain "+ preIcoTokensSold +" CJToken in the first account", async function() {
         await printBalance();
         let token = await CJToken.deployed();
         let balance = await token.balanceOf.call(owner);
-        assert.equal(balance.valueOf(), 0, "0 wasn't in the first account");
+        assert.equal(web3.fromWei(balance.valueOf()), preIcoTokensSold, preIcoTokensSold + " wasn't in the first account");
     });
 
-    it("should have 1,692,000,000 CJToken in Crowdsale contract", async function() {
+    it("should have "+ maxCap +" CJToken in Crowdsale contract", async function() {
         let token = await CJToken.deployed();
         let balance = await token.balanceOf.call(Crowdsale.address);
-        assert.equal(balance.valueOf(), 1692000000000000000000000000, "1,692,000,000.000000 wasn't in the Crowdsale account")
+        assert.equal(web3.fromWei(balance.valueOf()), maxCap, maxCap + " wasn't in the Crowdsale account")
   });
 
   it("Should not Buy less than 1000 tokens", async function() {
@@ -183,28 +189,16 @@ contract('ICO', function(accounts) {
       throw new Error("I should never see this!")
   });
 
-  it("Should distribute the reserve tokens and burn the rest", async function() {
+  it("Should burn the remaining tokens", async function() {
       let token = await CJToken.deployed();
       let ico = await Crowdsale.deployed();
 
-      let txn = await ico.sendReserveTokens({from: owner});
-      let balance = await token.balanceOf.call(wallet);
+      let txn = await ico.finalizeCrowdsale({from: owner});
+      let balance = await token.balanceOf.call(Crowdsale.address);
 
-      let reserveAmount = (totalTokensSold + preIcoTokensSold) * 35 / 65;
-      console.log("total token sold (including preICO): ", web3.fromWei(totalTokensSold + preIcoTokensSold, "ether").toString());
-      console.log("reserve amount: ", web3.fromWei(reserveAmount, "ether").toString());
 
-      assert.equal(balance.valueOf(), reserveAmount, "reserve amount is incorrect.");
+      assert.equal(balance.valueOf(), 0, "Crowdsale contract still have tokens.");
 
-  });
-
-  it("Should return an empty token balance for the ICO contract", async function() {
-      let token = await CJToken.deployed();
-      balance = await token.balanceOf.call(Crowdsale.address);
-
-      assert.equal(balance.valueOf(), 0, "Crowdsale contract still have tokens");
-
-      await printBalance();
   });
 
 
