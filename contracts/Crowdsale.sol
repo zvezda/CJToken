@@ -52,9 +52,8 @@ contract Crowdsale is Ownable {
 
     // allow owner to modify address of wallet
     function setMultiSigVault(address _multisigVault) public onlyOwner {
-        if (_multisigVault != address(0)) {
-            multisigVault = _multisigVault;
-        }
+        require(_multisigVault != address(0));
+        multisigVault = _multisigVault;
     }
 
     // allow owner to set the number of tokens sold during the preSale
