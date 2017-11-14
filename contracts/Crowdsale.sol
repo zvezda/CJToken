@@ -57,12 +57,12 @@ contract Crowdsale is Ownable {
 
     // compute amount of token based on 1 ETH = 2400 CJT
     function getTokenAmount(uint256 _weiAmount) internal returns(uint256) {
-        uint256 tokens = _weiAmount.mul(2400);
-        // cannot buy less than 1000 tokens
-        if (tokens < 1000 * (10 ** 18)) {
-            return 0;
+        // minimum deposit amount is 0.4 ETH
+        if (_weiAmount < 0.4 * (10 ** 18)) {
+          return 0;
         }
 
+        uint256 tokens = _weiAmount.mul(2400);
         // compute bonus
         if(now < startTime + 7*24*60* 1 minutes) {
             tokens += (tokens * 15) / 100; // 15% for first week
@@ -120,8 +120,8 @@ contract Crowdsale is Ownable {
     // can only be called when the ICO is over
     function finalizeCrowdsale() {
         require(hasEnded());
-        if (coin.balanceOf(this) > 0) {
-          coin.burn(coin.balanceOf(this));
-        }
+        require(coin.balanceOf(this) > 0);
+
+        coin.burn(coin.balanceOf(this));
     }
 }

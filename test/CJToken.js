@@ -84,9 +84,9 @@ contract('ICO', function(accounts) {
         assert.equal(web3.fromWei(balance.valueOf()), maxCap, maxCap + " wasn't in the Crowdsale account")
   });
 
-  it("Should not Buy less than 1000 tokens", async function() {
+  it("Should not deposit less than 0.4 ETH", async function() {
       try {
-          let balance = await investEther(0.1, buyer);
+          let balance = await investEther(0.3, buyer);
       } catch (e) {
           return true;
       }
