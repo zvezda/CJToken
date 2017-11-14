@@ -147,13 +147,13 @@ contract('ICO', function(accounts) {
   });
 
 
-  it("Should Buy 24000 tokens from buyer2", async function() {
+  it("Should Buy 24000 tokens from buyer", async function() {
       await timeTravel(86400 * 1); // 1 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
-      let balance = await investEther(10, buyer2);
-      totalTokensSold += 24000000000000000000000;
-      buyer2TokenBalance += 24000000000000000000000;
-      assert.equal(balance.valueOf(), buyer2TokenBalance, "24000 wasn't in the buyer2 account.");
+      let balance = await investEther(25, buyer);
+      totalTokensSold += 60000000000000000000000;
+      buyerTokenBalance += 60000000000000000000000;
+      assert.equal(balance.valueOf(), buyerTokenBalance, "40000 wasn't in the buyer2 account.");
   });
 
   it("Should Buy 48000 tokens from buyer2", async function() {
@@ -177,7 +177,7 @@ contract('ICO', function(accounts) {
   });
 
 
-  it("Should not Buy tokens when ICO end date", async function() {
+  it("Should not Buy tokens after ICO end date", async function() {
       await timeTravel(86400 * 40); // 40 day later
       await mineBlock(); // workaround for https://github.com/ethereumjs/testrpc/issues/336
       try {

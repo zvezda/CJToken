@@ -82,7 +82,8 @@ contract Crowdsale is Ownable {
     // low level token purchase function
     function buyTokens(address beneficiary) payable {
         require(beneficiary != 0x0);
-        require(validPurchase());
+        require(msg.value != 0);
+        require(!hasEnded());
 
         uint256 weiAmount = msg.value;
 
@@ -90,22 +91,24 @@ contract Crowdsale is Ownable {
         uint256 tokens = getTokenAmount(weiAmount);
         require(tokens > 0);
 
+        // check if we are over maxCap
+        if (tokensSold + tokens > maxCap) {
+          // send remaining tokens to user
+          uint256 overSoldTokens = (tokensSold + tokens) - maxCap;
+          uint256 refundWeiAmount = weiAmount * overSoldTokens / tokens;
+          weiAmount = weiAmount - refundWeiAmount;
+          tokens = tokens - overSoldTokens;
+          // return extra ether to user
+          beneficiary.transfer(refundWeiAmount);
+        }
+
         // update state
         weiRaised = weiRaised.add(weiAmount);
-
         tokensSold = tokensSold.add(tokens);
-        require(tokensSold <= maxCap);
 
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
-        multisigVault.transfer(msg.value);
-    }
-
-    // @return true if the transaction can buy tokens
-    function validPurchase() internal constant returns (bool) {
-        bool withinPeriod = now >= startTime && now <= endTime;
-        bool nonZeroPurchase = msg.value != 0;
-        return withinPeriod && nonZeroPurchase;
+        multisigVault.transfer(weiAmount);
     }
 
     // @return true if crowdsale event has ended
@@ -116,7 +119,9 @@ contract Crowdsale is Ownable {
     // Finalize crowdsale buy burning the remaining tokens
     // can only be called when the ICO is over
     function finalizeCrowdsale() {
-        require(now > endTime || tokensSold >= maxCap);
-        coin.burn(coin.balanceOf(this));
+        require(hasEnded());
+        if (coin.balanceOf(this) > 0) {
+          coin.burn(coin.balanceOf(this));
+        }
     }
 }

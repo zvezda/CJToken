@@ -29,9 +29,11 @@ module.exports = function(deployer) {
   			console.log("Crowdsale address: " + Crowdsale.address);
   			return CJToken.deployed().then(function(token) {
 					return Crowdsale.deployed().then(function(crowdsale) {
+
 						// send token to crowdsale contract
 						return token.transfer(Crowdsale.address, web3.toWei(maxCap), {from: owner}).then(function () {
 							return token.balanceOf.call(Crowdsale.address).then(function (Cbalance) {
+
 								// send reserve tokens
 								return token.transfer(reserveWallet, web3.toWei(reserveAmount), {from: owner}).then(function () {
 									return token.balanceOf.call(reserveWallet).then(function (Rbalance) {
