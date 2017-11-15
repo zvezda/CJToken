@@ -39,13 +39,8 @@ contract Crowdsale is Ownable {
         endTime = startTime + 41 days; // ICO end on Jan 07 2018 00:00:00 GMT
     }
 
-    modifier isStarted() {
-      require(now > startTime && now < endTime);
-      _;
-    }
-
     // fallback function can be used to buy tokens
-    function () isStarted payable {
+    function () payable {
         buyTokens(msg.sender);
     }
 
@@ -64,15 +59,15 @@ contract Crowdsale is Ownable {
 
         uint256 tokens = _weiAmount.mul(2400);
         // compute bonus
-        if(now < startTime + 7*24*60* 1 minutes) {
+        if(now < startTime + 7 * 1 days) {
             tokens += (tokens * 15) / 100; // 15% for first week
-        } else if(now < startTime + 14*24*60* 1 minutes) {
+        } else if(now < startTime + 14 * 1 days) {
             tokens += (tokens * 12) / 100; // 12% for second week
-        } else if(now < startTime + 21*24*60* 1 minutes) {
+        } else if(now < startTime + 21 * 1 days) {
             tokens += (tokens * 9) / 100; // 9% for third week
-        } else if(now < startTime + 28*24*60* 1 minutes) {
+        } else if(now < startTime + 28 * 1 days) {
             tokens += (tokens * 6) / 100; // 6% for fourth week
-        } else if(now < startTime + 35*24*60* 1 minutes) {
+        } else if(now < startTime + 35 * 1 days) {
             tokens += (tokens * 3) / 100; // 3% for fifth week
         }
 
@@ -84,6 +79,7 @@ contract Crowdsale is Ownable {
         require(beneficiary != 0x0);
         require(msg.value != 0);
         require(!hasEnded());
+        require(now > startTime);
 
         uint256 weiAmount = msg.value;
 
