@@ -60,15 +60,13 @@ contract Crowdsale is Ownable {
         uint256 tokens = _weiAmount.mul(2400);
         // compute bonus
         if(now < startTime + 7 * 1 days) {
-            tokens += (tokens * 15) / 100; // 15% for first week
+            tokens += (tokens * 12) / 100; // 12% for first week
         } else if(now < startTime + 14 * 1 days) {
-            tokens += (tokens * 12) / 100; // 12% for second week
+            tokens += (tokens * 9) / 100; // 9% for second week
         } else if(now < startTime + 21 * 1 days) {
-            tokens += (tokens * 9) / 100; // 9% for third week
+            tokens += (tokens * 6) / 100; // 6% for third week
         } else if(now < startTime + 28 * 1 days) {
-            tokens += (tokens * 6) / 100; // 6% for fourth week
-        } else if(now < startTime + 35 * 1 days) {
-            tokens += (tokens * 3) / 100; // 3% for fifth week
+            tokens += (tokens * 3) / 100; // 3% for fourth week
         }
 
         return tokens;
