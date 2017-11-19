@@ -34,9 +34,9 @@ contract Crowdsale is Ownable {
         multisigVault = _to;
         maxCap = _maxCap;
 
-        // startTime = 1511740800; // new Date("Nov 27 2017 00:00:00 GMT").getTime() / 1000;
+        // startTime = 1514937600; // new Date("Jan 03 2018 00:00:00 GMT").getTime() / 1000;
         startTime = now; // for testing we use now
-        endTime = startTime + 41 days; // ICO end on Jan 07 2018 00:00:00 GMT
+        endTime = startTime + 41 days; // ICO end on Feb 12 2018 00:00:00 GMT
     }
 
     // fallback function can be used to buy tokens
