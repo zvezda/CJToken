@@ -80,6 +80,7 @@ contract Crowdsale is Ownable {
         require(now > startTime);
 
         uint256 weiAmount = msg.value;
+        uint256 refundWeiAmount = 0;
 
         // calculate token amount to be sent
         uint256 tokens = getTokenAmount(weiAmount);
@@ -89,11 +90,9 @@ contract Crowdsale is Ownable {
         if (tokensSold + tokens > maxCap) {
           // send remaining tokens to user
           uint256 overSoldTokens = (tokensSold + tokens) - maxCap;
-          uint256 refundWeiAmount = weiAmount * overSoldTokens / tokens;
+          refundWeiAmount = weiAmount * overSoldTokens / tokens;
           weiAmount = weiAmount - refundWeiAmount;
           tokens = tokens - overSoldTokens;
-          // return extra ether to user
-          beneficiary.transfer(refundWeiAmount);
         }
 
         // update state
@@ -103,6 +102,11 @@ contract Crowdsale is Ownable {
         coin.transfer(beneficiary, tokens);
         TokenPurchase(msg.sender, beneficiary, weiAmount, tokens);
         multisigVault.transfer(weiAmount);
+
+        // return extra ether to last user
+        if (refundWeiAmount > 0) {
+          beneficiary.transfer(refundWeiAmount);
+        }
     }
 
     // @return true if crowdsale event has ended
